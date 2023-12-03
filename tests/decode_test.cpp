@@ -20,7 +20,7 @@ const std::vector<std::tuple<std::string, int, int>> TEST_DATA{
     {"7pqrstsixteen", 7, 6},
 };
 
-TEST(AocLib, DecodeDigitsLeft) {
+TEST(AocDigits, DecodeDigitsLeft) {
     for (const auto& [input, expected, _] : TEST_DATA) {
         std::optional<int> x{};
 
@@ -36,7 +36,7 @@ TEST(AocLib, DecodeDigitsLeft) {
     }
 }
 
-TEST(AocLib, DecodeDigitsRight) {
+TEST(AocDigits, DecodeDigitsRight) {
     for (const auto& [input, _, expected] : TEST_DATA) {
         std::optional<int> x{};
 
