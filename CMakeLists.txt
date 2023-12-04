@@ -19,6 +19,10 @@ add_executable(
 list(APPEND executables aoc_test)
 add_executable(day1 "src/day1.cpp")
 list(APPEND executables day1)
+add_executable(day2 "src/day2.cpp")
+list(APPEND executables day2)
+add_executable(day3 "src/day3.cpp")
+list(APPEND executables day3)
 
 # copy input data files
 add_custom_target(copy-data
