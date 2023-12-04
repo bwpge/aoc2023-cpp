@@ -27,7 +27,7 @@ namespace details {
 
     template<StrLike T>
     size_type pattern_len(const T& t) {
-        return t.length();
+        return std::string_view(t).length();
     }
 }  // namespace details
 
@@ -175,15 +175,15 @@ std::vector<std::string_view> split(std::string_view s, P pattern, SplitOptions 
             left = trim(left);
         }
 
-        if (((static_cast<bool>(opts & SplitOptions::DiscardEmpty)) && !left.empty())
-            || (!static_cast<bool>(opts & SplitOptions::DiscardEmpty))) {
+        bool discard = static_cast<bool>(opts & SplitOptions::DiscardEmpty);
+        if (!discard || (discard && !left.empty())) {
             result.push_back(left);
         }
 
         buf = right;
     }
 
-    if (!result.empty()) {
+    if (!result.empty() || !buf.empty()) {
         if (static_cast<bool>(opts & SplitOptions::Trim)) {
             buf = trim(buf);
         }
