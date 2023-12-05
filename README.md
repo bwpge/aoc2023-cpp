@@ -26,6 +26,20 @@ Markdown versions of each problem are stored as README's for each solution direc
 | 3 | [Gear Ratios](day3/README.md) |
 | 4 | [Scratchcards](day4/README.md) |
 
+## Tools
+
+### `generate.py`
+
+This is a simple python script to generate a new solution directory with templated files.
+
+Basic usage (executed from the `tools` directory):
+
+```sh
+python generate.py -n 1 -t 'Trebuchet?!'
+```
+
+Use the `--help` flag to display all available options.
+
 ## Testing
 
 Tests are disabled by default since `GTest` is quite heavy and can take awhile to build. You can enable tests with the `AOC_BUILD_TESTS` option. This may be specified either through the CMake GUI or with the command line option `-DAOC_BUILD_TESTS=ON`.
