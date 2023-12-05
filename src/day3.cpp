@@ -1,6 +1,7 @@
+#include "aoc/aoc.hpp"
+
 #include <cctype>
 #include <filesystem>
-#include <fstream>
 #include <iostream>
 #include <optional>
 #include <ranges>
@@ -70,10 +71,7 @@ public:
     friend std::ostream;
 
     static Schematic parse(const std::filesystem::path& path) {
-        std::fstream input{path};
-        if (!input) {
-            throw std::runtime_error{"Failed to read file"};
-        }
+        auto input = aoc::open(path);
 
         Schematic schematic{};
         std::string line{};
@@ -86,14 +84,12 @@ public:
             if (!schematic._xmax) {
                 schematic._xmax = xmax;
             } else if (schematic._xmax != xmax) {
-                throw std::runtime_error{"Inconsistent schematic width"};
+                aoc::panic("Inconsistent schematic width");
             }
 
             schematic._grid.push_back(row);
         }
-        if (schematic._grid.empty()) {
-            throw std::runtime_error{"Schematic contains no rows"};
-        }
+        AOC_ASSERT(!schematic._grid.empty(), "Schematic contains no rows");
 
         schematic._ymax = schematic._grid.size();
         schematic.process_grid();
@@ -146,7 +142,7 @@ private:
         auto pop_s = [&s, this](size_t col) {
             if (s.has_value()) {
                 if (col <= s->start) {
-                    throw std::runtime_error{"Span count cannot result in value <= 0"};
+                    aoc::panic("Span count cannot be negative");
                 }
                 s->count = col - s->start;
                 this->_numbers.push_back(s.value());

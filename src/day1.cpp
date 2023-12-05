@@ -14,11 +14,9 @@ int day1(const std::filesystem::path& path) {
         throw std::runtime_error{"Failed to read file"};
     }
 
-    int count = 0;
     std::string line{};
     std::vector<int> nums{};
     while (std::getline(input, line)) {
-        count++;
         std::optional<int> x{};
         std::optional<int> y{};
 
@@ -39,7 +37,6 @@ int day1(const std::filesystem::path& path) {
         }
 
         auto num = x.value() * 10 + y.value();
-        std::cout << "Line " << count << ": " << num << '\n';
         nums.push_back(num);
     }
 

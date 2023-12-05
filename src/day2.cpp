@@ -1,9 +1,7 @@
 #include "aoc/aoc.hpp"
 
 #include <filesystem>
-#include <fstream>
 #include <iostream>
-#include <stdexcept>
 #include <string>
 
 struct GameSet {
@@ -19,9 +17,8 @@ public:
 
         auto [prefix, body] = aoc::split_once(s, ": ").value();
         auto [lit, numstr] = aoc::split_once(prefix, ' ').value();
-        if (lit != "Game") {
-            std::cout << "ERROR: Unexpected token `" << lit << "`\n";
-        }
+        AOC_ASSERT(lit == "Game", fmt::format("Unexpected token `{}`", lit));
+
         game._id = std::stoi(std::string{numstr});
 
         auto samples = aoc::split(body, "; ");
@@ -39,7 +36,7 @@ public:
                 } else if (color == "blue") {
                     set.blue = count;
                 } else {
-                    throw std::runtime_error{"Unknown color"};
+                    aoc::panic(fmt::format("Unknown color `{}`", color));
                 }
             }
             game._sets.push_back(set);
@@ -81,10 +78,7 @@ private:
 };
 
 std::vector<Game> day2(const std::filesystem::path& path) {
-    std::fstream input{path};
-    if (!input) {
-        throw std::runtime_error{"Failed to read file"};
-    }
+    auto input = aoc::open(path);
 
     std::vector<Game> games{};
     std::string line{};
