@@ -23,6 +23,8 @@ add_executable(day2 "src/day2.cpp")
 list(APPEND executables day2)
 add_executable(day3 "src/day3.cpp")
 list(APPEND executables day3)
+add_executable(day4 "src/day4.cpp")
+list(APPEND executables day4)
 
 # copy input data files
 add_custom_target(copy-data
