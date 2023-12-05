@@ -32,13 +32,15 @@ target_precompile_headers(${PROJECT_NAME}
         "<cctype>"
         "<filesystem>"
         "<fstream>"
-        "<optional>"
+        "<iostream>"
         "<optional>"
         "<ostream>"
+        "<source_location>"
         "<string>"
         "<string_view>"
         "<sstream>"
         "<vector>"
+        "<utility>"
 )
 
 # ================
