@@ -4,30 +4,29 @@ import argparse, shutil, sys
 from pathlib import Path
 
 
-MAIN_CPP_TEMPLATE = """#include "aoc/aoc.hpp"
+MAIN_CPP_TEMPLATE = """#include "{proj_name}.hpp"
 
 #include <iostream>
 
-void part1() {{
-    std::cout << "Hello from Part 1!\\n";
-}}
+void part1() {{}}
 
-void part2() {{
-    std::cout << "Hello from Part 2!\\n";
-}}
+void part2() {{}}
 
 int main() {{
-    std::cout << "Day {day} solution:";
+    std::cout << "Day {day}: TODO";
     part1();
     part2();
-
-    return 0;
 }}
 """
 
-HEADER_TEMPLATE = "#pragma once\n"
+HEADER_TEMPLATE = """#pragma once
 
-TEST_CPP_TEMPLATE = """#include "aoc/aoc.hpp"
+#include "aoc/aoc.hpp"
+
+namespace {proj_name} {{}}  // namespace {proj_name}
+"""
+
+TEST_CPP_TEMPLATE = """#include "{proj_name}"
 
 #include <gtest/gtest.h>
 
@@ -56,8 +55,9 @@ def confirm(prompt: str | None = None):
     return choice == "y" or choice == "yes"
 
 
-def info(msg: str):
-    print(f"  - {msg}")
+def status(msg: str, level: int = 1):
+    indent = "  " * level
+    print(f"{indent}- {msg}")
 
 
 parser = argparse.ArgumentParser(
@@ -122,31 +122,42 @@ if __name__ == "__main__":
         if not confirm():
             sys.exit(0)
 
+    file_contents = {
+        proj_dir.joinpath("main.cpp"): MAIN_CPP_TEMPLATE.format(
+            proj_name=proj_name, day=day
+        ),
+        proj_include.joinpath(f"{proj_name}.hpp"): HEADER_TEMPLATE.format(
+            proj_name=proj_name
+        ),
+        proj_dir.joinpath(f"{proj_name}_test.cpp"): TEST_CPP_TEMPLATE.format(
+            proj_name=proj_name, day=day
+        ),
+        proj_dir.joinpath("README.md"): README_TEMPLATE.format(
+            day=day, title=f": {proj_title}" if proj_title else ""
+        ),
+    }
+
+    directories = [
+        proj_dir,
+        proj_include,
+    ]
+
     print(f"\nCreating solution at: {proj_dir.resolve()}\n")
 
     if proj_dir.exists():
-        info("Deleting existing directory")
+        status("Deleting existing directory")
         shutil.rmtree(proj_dir)
 
-    info("Creating directory structure")
-    proj_dir.mkdir()
-    proj_include.mkdir()
+    status("Creating directory structure")
+    for dir in directories:
+        status(str(dir.resolve()), 2)
+        dir.mkdir()
 
-    info("Writing files")
-    with open(proj_dir.joinpath("main.cpp"), "w") as f:
-        f.write(MAIN_CPP_TEMPLATE.format(day=day))
-
-    with open(proj_include.joinpath(f"{proj_name}.hpp"), "w") as f:
-        f.write(HEADER_TEMPLATE)
-
-    with open(proj_dir.joinpath(f"{proj_name}_test.cpp"), "w") as f:
-        f.write(TEST_CPP_TEMPLATE.format(day=day))
-
-    with open(proj_dir.joinpath("README.md"), "w") as f:
-        title = ""
-        if proj_title:
-            title = f": {proj_title}"
-        f.write(README_TEMPLATE.format(day=day, title=title))
+    status("Writing files")
+    for path, content in file_contents.items():
+        status(str(path.resolve()), 2)
+        with open(path, "w") as f:
+            f.write(content)
 
     print("\nProject successfully created!")
     print(
