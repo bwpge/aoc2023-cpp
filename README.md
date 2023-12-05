@@ -33,10 +33,22 @@ Markdown versions of each problem are stored as README's for each solution direc
 
 This is a simple python script to generate a new solution directory with templated files.
 
-Basic usage (executed from the `tools` directory):
+Example usage:
 
 ```sh
+cd tools
 python generate.py -n 1 -t 'Trebuchet?!'
+```
+
+Will generate `day1` in the repository root (`tools/../` by default) with the structure:
+
+```
+day1/
+├── include/
+│  └── day1.hpp
+├── day1_test.cpp
+├── main.cpp
+└── README.md
 ```
 
 Use the `--help` flag to display all available options.
