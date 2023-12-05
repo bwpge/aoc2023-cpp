@@ -1,7 +1,6 @@
 #pragma once
 
 #include <algorithm>
-#include <cctype>
 #include <optional>
 #include <ostream>
 #include <sstream>
@@ -62,31 +61,13 @@ std::string_view trim(const T& s) {
     return sv;
 }
 
-inline void to_lower(std::string& s) {
-    std::transform(s.begin(), s.end(), s.begin(), [](auto c) {
-        return static_cast<char>(std::tolower(c));
-    });
-}
+void to_lower(std::string& s);
 
-inline std::string to_lower_copy(std::string_view sv) {
-    std::string result{sv};
-    to_lower(result);
+std::string to_lower_copy(std::string_view sv);
 
-    return result;
-}
+void to_upper(std::string& s);
 
-inline void to_upper(std::string& s) {
-    std::transform(s.begin(), s.end(), s.begin(), [](auto c) {
-        return static_cast<char>(std::toupper(c));
-    });
-}
-
-inline std::string to_upper_copy(std::string_view sv) {
-    std::string result{sv};
-    to_upper(result);
-
-    return result;
-}
+std::string to_upper_copy(std::string_view sv);
 
 template<typename T, typename D>
 std::string join(const T& items, D delim) {
@@ -107,36 +88,11 @@ enum class SplitOptions {
     Trim = 1 << 1,
 };
 
-inline SplitOptions operator|(SplitOptions lhs, SplitOptions rhs) {
-    using Ty = std::underlying_type_t<SplitOptions>;
-    return static_cast<SplitOptions>(static_cast<Ty>(lhs) | static_cast<Ty>(rhs));
-}
+SplitOptions operator|(SplitOptions lhs, SplitOptions rhs);
 
-inline SplitOptions operator&(SplitOptions lhs, SplitOptions rhs) {
-    using Ty = std::underlying_type_t<SplitOptions>;
-    return static_cast<SplitOptions>(static_cast<Ty>(lhs) & static_cast<Ty>(rhs));
-}
+SplitOptions operator&(SplitOptions lhs, SplitOptions rhs);
 
-inline std::ostream& operator<<(std::ostream& os, const SplitOptions& opt) {
-    std::vector<std::string> values{};
-    if (opt == SplitOptions::None) {
-        return os << "{ None }";
-    }
-
-    os << '{';
-    if (static_cast<bool>(opt & SplitOptions::DiscardEmpty)) {
-        values.emplace_back("DiscardEmpty");
-    }
-    if (static_cast<bool>(opt & SplitOptions::Trim)) {
-        values.emplace_back("Trim");
-    }
-    auto joined = aoc::join(values, ", ");
-    if (joined.empty()) {
-        return os << '}';
-    }
-
-    return os << ' ' << joined << " }";
-}
+std::ostream& operator<<(std::ostream& os, const SplitOptions& opt);
 
 template<Pattern P>
 std::optional<std::pair<std::string_view, std::string_view>> split_once(

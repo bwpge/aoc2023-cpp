@@ -1,4 +1,4 @@
-#include "aoc/digit.hpp"
+#include "aoc/aoc.hpp"
 
 #include <gtest/gtest.h>
 

@@ -1,5 +1,4 @@
-#include "aoc/fs.hpp"
-#include "aoc/stringutils.hpp"
+#include "aoc/aoc.hpp"
 
 #include <iostream>
 #include <string>

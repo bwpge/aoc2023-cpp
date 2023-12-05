@@ -1,10 +1,7 @@
-#pragma once
-
+#include "aoc/digit.hpp"
 #include "aoc/stringutils.hpp"
 
 #include <array>
-#include <optional>
-#include <string>
 
 namespace aoc {
 
@@ -12,7 +9,7 @@ const auto SPELLED_NUMS = std::to_array<std::string>(
     {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"}
 );
 
-inline std::optional<int> decode_digit(std::string s, size_t pos) {
+std::optional<int> decode_digit(std::string s, size_t pos) {
     if (std::isdigit(s[pos])) {
         return s[pos] - '0';
     }
