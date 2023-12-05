@@ -25,6 +25,7 @@ Markdown versions of each problem are stored as README's for each solution direc
 | 2 | [Cube Conundrum](README/day2.md) |
 | 3 | [Gear Ratios](day3/README.md) |
 | 4 | [Scratchcards](day4/README.md) |
+| 5 | [If You Give A Seed A Fertilizer](day5/README.md) |
 
 ## Tools
 
