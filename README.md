@@ -17,14 +17,14 @@ Be sure to change `YOUR_PLATFORM` to an appropriate triplet, e.g., `x64-windows-
 
 ## Problems
 
-Markdown versions of each problem are stored in the `problems` directory. Links are provided here for reference.
+Markdown versions of each problem are stored as README's for each solution directory (e.g., `day1`, `day2`, etc.).
 
 | Day | Title |
 |-----|-------|
-| 1 | [Trebuchet?!](problems/day1.md) |
-| 2 | [Cube Conundrum](problems/day2.md) |
-| 3 | [Gear Ratios](problems/day3.md) |
-| 4 | [Scratchcards](problems/day4.md) |
+| 1 | [Trebuchet?!](day1/README.md) |
+| 2 | [Cube Conundrum](README/day2.md) |
+| 3 | [Gear Ratios](day3/README.md) |
+| 4 | [Scratchcards](day4/README.md) |
 
 ## Testing
 
@@ -32,9 +32,10 @@ Tests are disabled by default since `GTest` is quite heavy and can take awhile t
 
 If using the CMake extension for VSCode, options can also be set in `.vscode/settings.json`:
 
-```json
+```jsonc
 {
     "cmake.configureArgs": [
+        // other args...
         "-DAOC_BUILD_TESTS=ON"
     ]
 }

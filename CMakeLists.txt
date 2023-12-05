@@ -18,27 +18,25 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/.clang-tidy" "Checks: '-*'")
 
 option(AOC_BUILD_TESTS "Build project tests" OFF)
 
+# ==============
+# SUBDIRECTORIES
+# ==============
+
 add_subdirectory(libaoc)
 if (AOC_BUILD_TESTS)
-    message(STATUS "Generating tests")
+    message(STATUS "Generating library tests")
     enable_testing()
     add_subdirectory(tests)
 endif()
 
-# =========
-# SOLUTIONS
-# =========
-
-set(executables "")
-
-add_executable(day1 "src/day1.cpp")
-list(APPEND executables day1)
-add_executable(day2 "src/day2.cpp")
-list(APPEND executables day2)
-add_executable(day3 "src/day3.cpp")
-list(APPEND executables day3)
-add_executable(day4 "src/day4.cpp")
-list(APPEND executables day4)
+# use this list to enumerate solution directories
+# see EXE CONFIG section for usage
+set(solutions
+    "day1"
+    "day2"
+    "day3"
+    "day4"
+)
 
 # ==========
 # INPUT DATA
@@ -53,7 +51,12 @@ add_custom_target(copy-data
 # EXE CONFIG
 # ==========
 
-foreach(exe IN LISTS executables)
+foreach(exe IN LISTS solutions)
+    add_executable(${exe} "${exe}/main.cpp")
+    target_include_directories(${exe} PUBLIC
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/${exe}/include>"
+    )
+
     if(MSVC)
         target_compile_options(${exe} PRIVATE /W4 /WX)
     else()
@@ -62,4 +65,26 @@ foreach(exe IN LISTS executables)
 
     add_dependencies(${exe} copy-data)
     target_link_libraries(${exe} libaoc::libaoc)
+
+    # add tests if enabled
+    if(AOC_BUILD_TESTS)
+        set(test_name "${exe}_test")
+        set(test_src "${CMAKE_CURRENT_SOURCE_DIR}/${exe}/${test_name}.cpp")
+
+        if (EXISTS "${test_src}")
+            message(STATUS "Generating ${exe} test")
+            add_executable(${test_name} "${test_src}")
+
+            set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+            find_package("GTest" CONFIG REQUIRED)
+            target_link_libraries(
+                ${test_name}
+                libaoc::libaoc
+                GTest::gtest
+                GTest::gtest_main
+            )
+            gtest_add_tests(TARGET ${test_name})
+        endif()
+    endif()
+
 endforeach()
