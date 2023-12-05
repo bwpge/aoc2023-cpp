@@ -113,7 +113,7 @@ TEST(AocStringUtils, SplitChar) {
              aoc::SplitOptions::DiscardEmpty | aoc::SplitOptions::Trim,
              {"1", "3", "4"}},
             {"xxxx", 'x', aoc::SplitOptions::None, {"", "", "", "", ""}},
-            {"abc", 'x', aoc::SplitOptions::None, {}},
+            {"abc", 'x', aoc::SplitOptions::None, {"abc"}},
             {"abc = 1!=", '=', aoc::SplitOptions::None, {"abc ", " 1!", ""}}
         };
 
