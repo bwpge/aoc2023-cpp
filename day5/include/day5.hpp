@@ -4,13 +4,44 @@
 
 #include <filesystem>
 #include <list>
+#include <ranges>
+#include <set>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace day5 {
 
 template<std::integral T>
+struct Seed {
+    T value{};
+    T length{};
+
+    [[nodiscard]]
+    bool contains(T val) const {
+        return val >= value && val < value + length;
+    }
+
+    bool operator==(const Seed<T>& rhs) const {
+        return value == rhs.value && length == rhs.length;
+    }
+};
+}  // namespace day5
+
+namespace std {
+template<>
+struct hash<day5::Seed<size_t>> {
+    size_t operator()(const day5::Seed<size_t>& seed) const {
+        return std::hash<size_t>()(seed.value) ^ (std::hash<size_t>()(seed.length) << 1);
+    }
+};
+}  // namespace std
+
+namespace day5 {
+
+template<std::integral T>
 struct Range {
+
     T src{};
     T dst{};
     T length{};
@@ -21,10 +52,22 @@ struct Range {
     }
 
     [[nodiscard]]
+    bool rcontains(T value) const {
+        return value >= dst && value < dst + length;
+    }
+
+    [[nodiscard]]
     T offset(T value) const {
         AOC_ASSERT(contains(value), "Range does not contain value");
         auto off = value - src;
         return dst + off;
+    }
+
+    [[nodiscard]]
+    T roffset(T value) const {
+        AOC_ASSERT(rcontains(value), "Range does not contain value");
+        auto off = value - dst;
+        return src + off;
     }
 };
 
@@ -38,6 +81,11 @@ struct RangeMap {
     }
 
     [[nodiscard]]
+    bool rcontains(const T& value) const {
+        return std::ranges::any_of(inner, [value](auto r) { return r.rcontains(value); });
+    }
+
+    [[nodiscard]]
     T at(const T& value) const {
         for (const auto& range : inner) {
             if (range.contains(value)) {
@@ -48,10 +96,32 @@ struct RangeMap {
         return value;
     }
 
+    [[nodiscard]]
+    T rev_at(const T& value) const {
+        for (const auto& range : inner) {
+            if (range.rcontains(value)) {
+                return range.roffset(value);
+            }
+        }
+
+        return value;
+    }
+
     void add(const Range<T>& other) {
         inner.push_back(other);
     }
 };
+
+template<std::integral T>
+std::unordered_set<Seed<T>> gen_seed_range(std::vector<T>& nums) {
+    std::unordered_set<Seed<T>> result{};
+    for (size_t i = 0, j = 1; j < nums.size(); i += 2, j += 2) {
+        auto s = Seed{nums.at(i), nums.at(j)};
+        spdlog::debug("Generate seed range: start={}, length={}", s.value, s.length);
+        result.insert(s);
+    }
+    return result;
+}
 
 class Almanac {
 public:
@@ -82,12 +152,18 @@ public:
                 );
 
                 if (use_seed_ranges) {
-                    AOC_TODO();
+                    almanac._seeds = gen_seed_range(nums);
                 } else {
-                    almanac._seeds = nums;
+                    std::transform(
+                        nums.begin(),
+                        nums.end(),
+                        std::inserter(almanac._seeds, almanac._seeds.end()),
+                        [](auto s) {
+                            return Seed{s, 1ULL};
+                        }
+                    );
                 }
 
-                spdlog::debug("Seeds to plant: [{}]", fmt::join(almanac._seeds, ", "));
                 continue;
             }
 
@@ -132,12 +208,32 @@ public:
     }
 
     [[nodiscard]]
-    const std::vector<size_t>& seeds() const {
+    std::optional<size_t> find_seed(size_t loc) {
+        size_t value = loc;
+        for (const auto& name : std::views::reverse(_keys)) {
+            const auto& map = _maps.at(name);
+            if (map.rcontains(value)) {
+                value = map.rev_at(value);
+            }
+        }
+
+        if (std::ranges::any_of(_seeds, [value](auto r) { return r.contains(value); })) {
+            return value;
+        }
+        return {};
+    }
+
+    [[nodiscard]]
+    const std::unordered_set<Seed<size_t>>& seeds() const {
         return _seeds;
     }
 
-    void set_seeds(const std::vector<size_t>& seeds) {
-        _seeds = seeds;
+    void set_seeds(const std::set<size_t>& seeds) {
+        _seeds.clear();
+        std::
+            transform(seeds.begin(), seeds.end(), std::inserter(_seeds, _seeds.end()), [](auto s) {
+                return Seed{s, 1ULL};
+            });
     }
 
     RangeMap<size_t>& operator[](const std::string& key) {
@@ -145,7 +241,7 @@ public:
     }
 
 private:
-    std::vector<size_t> _seeds{};
+    std::unordered_set<Seed<size_t>> _seeds{};
     std::vector<std::string> _keys{
         "seed-to-soil",
         "soil-to-fertilizer",

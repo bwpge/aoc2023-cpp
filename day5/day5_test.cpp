@@ -11,6 +11,15 @@ TEST(Day5, Range) {
     EXPECT_EQ(range.offset(96), 98);
 }
 
+TEST(Day5, RangeRev) {
+    day5::Range<uint32_t> range{50, 52, 48};
+
+    EXPECT_TRUE(range.rcontains(79));
+    EXPECT_TRUE(range.rcontains(98));
+    EXPECT_FALSE(range.rcontains(49));
+    EXPECT_EQ(range.roffset(98), 96);
+}
+
 TEST(Day5, RangeMap) {
     day5::RangeMap<uint32_t> map{{
         {98, 50, 2},
@@ -26,7 +35,7 @@ TEST(Day5, RangeMap) {
     EXPECT_EQ(map.at(49), 49);
 }
 
-TEST(Day5, Example) {
+day5::Almanac example() {
     day5::Almanac almanac{};
     almanac.set_seeds({79, 14, 55, 13});
     almanac["seed-to-soil"] = day5::RangeMap<size_t>{{
@@ -61,6 +70,12 @@ TEST(Day5, Example) {
         {56, 60, 37},
         {93, 56, 4},
     }};
+
+    return almanac;
+}
+
+TEST(Day5, Example) {
+    auto almanac = example();
 
     // seed 79
     EXPECT_EQ(almanac["seed-to-soil"].at(79), 81);
@@ -97,9 +112,23 @@ TEST(Day5, Example) {
     EXPECT_EQ(almanac["light-to-temperature"].at(34), 34);
     EXPECT_EQ(almanac["temperature-to-humidity"].at(34), 35);
     EXPECT_EQ(almanac["humidity-to-location"].at(35), 35);
+}
+
+TEST(Day5, ExampleMapLocation) {
+    auto almanac = example();
 
     EXPECT_EQ(almanac.map_location(79).back(), 82);
     EXPECT_EQ(almanac.map_location(14).back(), 43);
     EXPECT_EQ(almanac.map_location(55).back(), 86);
     EXPECT_EQ(almanac.map_location(13).back(), 35);
+}
+
+TEST(Day5, ExampleFindSeed) {
+    auto almanac = example();
+
+    EXPECT_EQ(almanac.find_seed(82).value(), 79);
+    EXPECT_EQ(almanac.find_seed(43).value(), 14);
+    EXPECT_EQ(almanac.find_seed(86).value(), 55);
+    EXPECT_EQ(almanac.find_seed(35).value(), 13);
+    EXPECT_FALSE(almanac.find_seed(0).has_value());
 }
