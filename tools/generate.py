@@ -26,7 +26,7 @@ HEADER_TEMPLATE = """#pragma once
 namespace {proj_name} {{}}  // namespace {proj_name}
 """
 
-TEST_CPP_TEMPLATE = """#include "{proj_name}"
+TEST_CPP_TEMPLATE = """#include "{proj_name}.hpp"
 
 #include <gtest/gtest.h>
 
