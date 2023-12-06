@@ -11,13 +11,13 @@ namespace aoc {
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 #if defined(_MSC_VER) || defined(__INTEL_COMPILER)
-  #define DEBUG_BREAK() __debugbreak()
+  #define AOC_DEBUGBREAK() __debugbreak()
 #else
   #include <signal.h>
   #if defined(SIGTRAP)
-    #define psnip_trap() raise(SIGTRAP)
+    #define AOC_DEBUGBREAK() raise(SIGTRAP)
   #else
-    #define psnip_trap() raise(SIGABRT)
+    #define AOC_DEBUGBREAK() raise(SIGABRT)
   #endif
 #endif
 
@@ -41,7 +41,7 @@ template<typename T>
 constexpr void panic(T&& msg, std::source_location location = std::source_location::current()) {
     spdlog::
         critical("PANIC: {} ({}:{})", std::forward<T>(msg), location.file_name(), location.line());
-    DEBUG_BREAK();
+    AOC_DEBUGBREAK();
     abort();
 }
 
