@@ -75,6 +75,9 @@ foreach(exe IN LISTS solutions)
         if (EXISTS "${test_src}")
             message(STATUS "Generating ${exe} test")
             add_executable(${test_name} "${test_src}")
+            target_include_directories(${test_name} PUBLIC
+                "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/${exe}/include>"
+            )
 
             set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
             find_package("GTest" CONFIG REQUIRED)
