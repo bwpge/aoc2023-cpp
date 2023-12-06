@@ -10,16 +10,29 @@
 namespace aoc {
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
+#if defined(_MSC_VER) || defined(__INTEL_COMPILER)
+  #define DEBUG_BREAK() __debugbreak()
+#else
+  #include <signal.h>
+  #if defined(SIGTRAP)
+    #define psnip_trap() raise(SIGTRAP)
+  #else
+    #define psnip_trap() raise(SIGABRT)
+  #endif
+#endif
+
 #define XSTRINGIFY(arg) #arg
 #define STRINGIFY(arg) XSTRINGIFY(arg)
 
-#define AOC_ASSERT(expr, msg)                                            \
-    do {                                                                 \
-        if (!(expr)) {                                                   \
-            spdlog::critical("FAILED ASSERTION: `{}`", STRINGIFY(expr)); \
-            ::aoc::panic(msg);                                           \
-        }                                                                \
+#define AOC_ASSERT(expr, msg)                                         \
+    do {                                                              \
+        if (!(expr)) {                                                \
+            spdlog::error("FAILED ASSERTION: `{}`", STRINGIFY(expr)); \
+            ::aoc::panic(msg);                                        \
+        }                                                             \
     } while (0)
+
+#define AOC_TODO() ::aoc::panic("Not implemented")
 
 // NOLINTEND(cppcoreguidelines-macro-usage)
 
@@ -28,6 +41,7 @@ template<typename T>
 constexpr void panic(T&& msg, std::source_location location = std::source_location::current()) {
     spdlog::
         critical("PANIC: {} ({}:{})", std::forward<T>(msg), location.file_name(), location.line());
+    DEBUG_BREAK();
     abort();
 }
 
