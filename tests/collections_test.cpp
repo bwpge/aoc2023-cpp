@@ -14,8 +14,8 @@ TEST(AocCollections, ZipCopy) {
     auto result = aoc::zip_copy(a, b);
 
     for (size_t i = 0; i < expected.size(); ++i) {
-        const auto& [first, second] = result.at(i);
-        const auto& [exp_first, exp_second] = expected.at(i);
+        const auto [first, second] = result.at(i);
+        const auto [exp_first, exp_second] = expected.at(i);
 
         EXPECT_EQ(first, exp_first) << "Mismatch on first at i=" << i;
         EXPECT_EQ(second, exp_second) << "Mismatch on second at i=" << i;
