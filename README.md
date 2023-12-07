@@ -62,9 +62,8 @@ If using the CMake extension for VSCode, options can also be set in `.vscode/set
 
 ```jsonc
 {
-    "cmake.configureArgs": [
-        // other args...
-        "-DAOC_BUILD_TESTS=ON"
-    ]
+    "cmake.configureSettings": {
+        "AOC_BUILD_TESTS": true
+    }
 }
 ```
