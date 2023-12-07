@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <optional>
 #include <ostream>
-#include <sstream>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -69,17 +68,16 @@ void to_upper(std::string& s);
 
 std::string to_upper_copy(std::string_view sv);
 
-template<typename T, typename D>
-std::string join(const T& items, D delim) {
-    std::ostringstream oss{};
-    for (size_t i = 0; i < items.size(); i++) {
-        oss << items.at(i);
-        if ((i + 1) < items.size()) {
-            oss << delim;
-        }
+template<StrLike T, Pattern P>
+std::string remove(const T& s, const P& pattern) {
+    std::string copy{s};
+    auto pos = copy.find(pattern);
+    while (pos != std::string::npos) {
+        copy.erase(pos, 1);
+        pos = copy.find(' ');
     }
 
-    return oss.str();
+    return copy;
 }
 
 enum class SplitOptions {

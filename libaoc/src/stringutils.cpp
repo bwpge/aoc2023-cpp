@@ -40,25 +40,4 @@ SplitOptions operator&(SplitOptions lhs, SplitOptions rhs) {
     return static_cast<SplitOptions>(static_cast<Ty>(lhs) & static_cast<Ty>(rhs));
 }
 
-std::ostream& operator<<(std::ostream& os, const SplitOptions& opt) {
-    std::vector<std::string> values{};
-    if (opt == SplitOptions::None) {
-        return os << "{ None }";
-    }
-
-    os << '{';
-    if (static_cast<bool>(opt & SplitOptions::DiscardEmpty)) {
-        values.emplace_back("DiscardEmpty");
-    }
-    if (static_cast<bool>(opt & SplitOptions::Trim)) {
-        values.emplace_back("Trim");
-    }
-    auto joined = aoc::join(values, ", ");
-    if (joined.empty()) {
-        return os << '}';
-    }
-
-    return os << ' ' << joined << " }";
-}
-
 }  // namespace aoc

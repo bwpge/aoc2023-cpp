@@ -124,9 +124,8 @@ TEST(AocStringUtils, SplitChar) {
             splits.size(),
             expected.size()
         ) << "Split returned incorrect length with:\n  input = '"
-          << input << "'\n  delimiter = '" << delim << "'\n  options = " << opts
-          << "\n  expected = " << testing::PrintToString(expected)
-          << "\n  actual = " << testing::PrintToString(splits);
+          << input << "'\n  delimiter = '" << delim << "\n  expected = "
+          << testing::PrintToString(expected) << "\n  actual = " << testing::PrintToString(splits);
         for (size_t i = 0; i < splits.size(); i++) {
             EXPECT_EQ(splits[i], expected[i]) << "Split differs at i = " << i;
         }
