@@ -9,20 +9,13 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 # PROJECT SOURCE
 # ==============
 
-set(ENGINE_HEADER_FILES
-    "include/aoc/aoc.hpp"
-    "include/aoc/digit.hpp"
-    "include/aoc/fs.hpp"
-    "include/aoc/stringutils.hpp"
-)
-
-set(ENGINE_SRC_FILES
+set(AOC_SRC_FILES
     "src/digit.cpp"
     "src/fs.cpp"
     "src/stringutils.cpp"
 )
 
-add_library(${PROJECT_NAME} STATIC ${ENGINE_HEADER_FILES} ${ENGINE_SRC_FILES})
+add_library(${PROJECT_NAME} STATIC ${AOC_SRC_FILES})
 add_library(libaoc::libaoc ALIAS libaoc)
 
 target_precompile_headers(${PROJECT_NAME}
@@ -35,6 +28,7 @@ target_precompile_headers(${PROJECT_NAME}
         "<iostream>"
         "<optional>"
         "<ostream>"
+        "<ranges>"
         "<source_location>"
         "<string>"
         "<string_view>"
@@ -73,10 +67,8 @@ endforeach()
 # COMPILER DEFINITIONS/LINKING
 # ============================
 
-target_include_directories(${PROJECT_NAME}
-    PUBLIC
-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
-        "$<BUILD_INTERFACE:${Vulkan_INCLUDE_DIR}>"
+target_include_directories(${PROJECT_NAME} PUBLIC
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
 )
 
 target_link_libraries(${PROJECT_NAME}
