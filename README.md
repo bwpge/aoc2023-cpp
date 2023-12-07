@@ -27,6 +27,7 @@ Markdown versions of each problem are stored as README's for each solution direc
 | 4 | [Scratchcards](day4/README.md) |
 | 5 | [If You Give A Seed A Fertilizer](day5/README.md) |
 | 6 | [Wait For It](day6/README.md) |
+| 7 | [Camel Cards](day7/README.md) |
 
 ## Tools
 
