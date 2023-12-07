@@ -67,9 +67,11 @@ foreach(exe IN LISTS solutions)
 
     add_dependencies(${exe} copy-data)
     target_link_libraries(${exe} libaoc::libaoc)
+endforeach()
 
-    # add tests if enabled
-    if(AOC_BUILD_TESTS)
+# add tests if enabled
+if(AOC_BUILD_TESTS)
+    foreach(exe IN LISTS solutions)
         set(test_name "${exe}_test")
         set(test_src "${CMAKE_CURRENT_SOURCE_DIR}/${exe}/${test_name}.cpp")
 
@@ -90,6 +92,5 @@ foreach(exe IN LISTS solutions)
             )
             gtest_add_tests(TARGET ${test_name})
         endif()
-    endif()
-
-endforeach()
+    endforeach()
+endif()
