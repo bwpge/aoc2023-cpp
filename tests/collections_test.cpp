@@ -2,9 +2,11 @@
 
 #include <gtest/gtest.h>
 
+#include <array>
+
 TEST(AocCollections, ZipCopy) {
     std::vector<int> a{1, 2, 3, 4};
-    std::set<std::string> b{"foo", "bar", "baz"};
+    std::array<std::string, 3> b{"foo", "bar", "baz"};
 
     std::vector<std::pair<int, std::string>> expected{
         {1, "foo"},
