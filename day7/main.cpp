@@ -3,31 +3,48 @@
 #include <filesystem>
 
 using day7::Hand;
+using day7::JOKERS_WILD;
+using day7::RuleSet;
 
-void part1(const std::filesystem::path& path) {
+std::vector<Hand> parse_hands(const std::filesystem::path& path, const RuleSet& rules) {
     auto input = aoc::open(path);
     std::vector<Hand> hands{};
 
     std::string line{};
     while (std::getline(input, line)) {
-        auto hand = Hand::parse(line);
+        auto hand = Hand::parse(line, rules);
         hands.push_back(hand);
     }
     std::ranges::sort(hands);
 
-    size_t winnings{};
-    for (size_t i = 0; i < hands.size(); ++i) {
-        auto rank = i + 1;
-        winnings += hands.at(i).bid() * rank;
-    }
-
-    fmt::print("Part 1: {}", winnings);
+    return hands;
 }
 
-void part2() {}
+size_t winnings(const std::vector<Hand>& hands) {
+    size_t result{};
+    for (size_t i = 0; i < hands.size(); ++i) {
+        auto rank = i + 1;
+        result += hands.at(i).bid() * rank;
+    }
+    return result;
+}
+
+void part1(const std::filesystem::path& path) {
+    auto hands = parse_hands(path, {});
+    auto result = winnings(hands);
+
+    fmt::println("Part 1: {}", result);
+}
+
+void part2(const std::filesystem::path& path) {
+    auto hands = parse_hands(path, JOKERS_WILD);
+    auto result = winnings(hands);
+
+    fmt::println("Part 2: {}", result);
+}
 
 int main() {
     std::filesystem::path path{"data/day7.txt"};
     part1(path);
-    part2();
+    part2(path);
 }

@@ -7,25 +7,58 @@ using day7::Hand;
 
 TEST(Day7, Card) {
     const std::vector<std::pair<char, int>> test_data{
-        {'A', 14},
-        {'K', 13},
-        {'Q', 12},
-        {'J', 11},
-        {'T', 10},
-        {'9', 9},
-        {'8', 8},
-        {'7', 7},
-        {'6', 6},
-        {'5', 5},
-        {'4', 4},
-        {'3', 3},
-        {'2', 2},
+        {'A', 12},
+        {'K', 11},
+        {'Q', 10},
+        {'J', 9},
+        {'T', 8},
+        {'9', 7},
+        {'8', 6},
+        {'7', 5},
+        {'6', 4},
+        {'5', 3},
+        {'4', 2},
+        {'3', 1},
+        {'2', 0},
     };
 
     for (const auto [c, expected] : test_data) {
-        auto card = Card::parse(c);
+        auto card = Card::parse(c, {});
         EXPECT_EQ(card.value, expected);
     }
+}
+
+TEST(Day7, CardWild) {
+    const std::vector<std::pair<char, int>> test_data{
+        {'A', 12},
+        {'K', 11},
+        {'Q', 10},
+        {'T', 9},
+        {'9', 8},
+        {'8', 7},
+        {'7', 6},
+        {'6', 5},
+        {'5', 4},
+        {'4', 3},
+        {'3', 2},
+        {'2', 1},
+        {'J', 0},
+    };
+
+    for (const auto [c, expected] : test_data) {
+        auto card = Card::parse(c, day7::JOKERS_WILD);
+        EXPECT_EQ(card.value, expected);
+    }
+}
+
+TEST(Day7, RuleIsWild) {
+    auto rules = day7::JOKERS_WILD;
+
+    EXPECT_TRUE(rules.is_wild('J'));
+    EXPECT_TRUE(rules.is_wild(0));
+
+    EXPECT_FALSE(rules.is_wild('A'));
+    EXPECT_FALSE(rules.is_wild(5));
 }
 
 TEST(Day7, HandKind) {
@@ -41,6 +74,21 @@ TEST(Day7, HandKind) {
 
     for (const auto& [cards, kind] : test_data) {
         Hand hand{cards};
+        EXPECT_EQ(hand.kind(), kind) << "With line = `" << cards << '`';
+    }
+}
+
+TEST(Day7, HandKindWild) {
+    std::vector<std::pair<std::string, Hand::Kind>> test_data{
+        {"32T3K", Hand::Kind::OnePair},
+        {"KK677", Hand::Kind::TwoPair},
+        {"T55J5", Hand::Kind::FourKind},
+        {"KTJJT", Hand::Kind::FourKind},
+        {"QQQJA", Hand::Kind::FourKind},
+    };
+
+    for (const auto& [cards, kind] : test_data) {
+        Hand hand{cards, day7::JOKERS_WILD};
         EXPECT_EQ(hand.kind(), kind) << "With line = `" << cards << '`';
     }
 }
