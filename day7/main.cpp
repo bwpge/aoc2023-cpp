@@ -6,7 +6,7 @@ using day7::Hand;
 using day7::JOKERS_WILD;
 using day7::RuleSet;
 
-std::vector<Hand> parse_hands(const std::filesystem::path& path, const RuleSet& rules) {
+std::vector<Hand> parse_hands(const std::filesystem::path& path, const RuleSet& rules = {}) {
     auto input = aoc::open(path);
     std::vector<Hand> hands{};
 
@@ -30,7 +30,7 @@ size_t winnings(const std::vector<Hand>& hands) {
 }
 
 void part1(const std::filesystem::path& path) {
-    auto hands = parse_hands(path, {});
+    auto hands = parse_hands(path);
     auto result = winnings(hands);
 
     fmt::println("Part 1: {}", result);

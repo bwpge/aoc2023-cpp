@@ -21,7 +21,7 @@ struct RuleSet {
 
     [[nodiscard]]
     bool is_wild(int i) const {
-        if (i >= labels.length() || i < 0) {
+        if (wild.empty()) {
             return false;
         }
         return is_wild(labels.at(i));
@@ -51,13 +51,7 @@ struct Card {
         return cards;
     }
 
-    bool operator==(const Card& other) const {
-        return value == other.value;
-    }
-
-    bool operator<(const Card& other) const {
-        return value < other.value;
-    }
+    auto operator<=>(const Card&) const = default;
 };
 
 class Hand {
@@ -91,7 +85,10 @@ public:
 
     [[nodiscard]]
     bool has_wilds() const {
-        return !_rules.wild.empty() || std::ranges::any_of(_cards, [this](const Card& c) {
+        if (_rules.wild.empty()) {
+            return false;
+        }
+        return std::ranges::any_of(_cards, [this](const Card& c) {
             return _rules.is_wild(c.value);
         });
     }
@@ -105,11 +102,6 @@ public:
     }
 
     bool operator<(const Hand& other) const {
-        AOC_ASSERT(
-            _cards.size() == other._cards.size(),
-            "Hands must have the same number of cards to compare"
-        );
-
         // hand kind takes priority
         auto k1 = kind();
         auto k2 = other.kind();
@@ -118,27 +110,30 @@ public:
         }
 
         // otherwise, check the first different card
-        for (size_t i = 0; i < _cards.size(); ++i) {
-            auto c1 = _cards.at(i);
-            auto c2 = other._cards.at(i);
+        auto s1 = size();
+        auto s2 = other.size();
+        for (size_t i = 0; i < std::min(s1, s2); ++i) {
+            const auto& c1 = _cards.at(i);
+            const auto& c2 = other._cards.at(i);
             if (c1 != c2) {
                 return c1 < c2;
             }
         }
 
-        return false;
+        // everything is equal, use hand size
+        return s1 < s2;
     }
 
     bool operator==(const Hand& other) const {
-        AOC_ASSERT(
-            _cards.size() == other._cards.size(),
-            "Hands must have the same number of cards to compare"
-        );
-
         return _cards == other._cards;
     }
 
     // additional comparison logic from: https://stackoverflow.com/a/18289698
+    // see also: https://en.cppreference.com/w/cpp/language/operators
+
+    bool operator!=(const Hand& other) const {
+        return !(*this == other);
+    }
 
     bool operator<=(const Hand& other) const {
         return !(other < *this);
@@ -150,6 +145,11 @@ public:
 
     bool operator>=(const Hand& other) const {
         return !(*this < other);
+    }
+
+    [[nodiscard]]
+    size_t size() const {
+        return _cards.size();
     }
 
     [[nodiscard]]
