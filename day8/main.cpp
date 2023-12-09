@@ -26,13 +26,18 @@ void part1(const std::filesystem::path& path) {
     auto [network, directions] = parse_map(path);
     auto steps = network.steps(directions);
 
-    fmt::print("Part 1: {}", steps);
+    fmt::println("Part 1: {}", steps);
 }
 
-void part2() {}
+void part2(const std::filesystem::path& path) {
+    auto [network, directions] = parse_map(path);
+    auto steps = network.steps_parallel(directions);
+
+    fmt::println("Part 2: {}", steps);
+}
 
 int main() {
     std::filesystem::path path{"data/day8.txt"};
     part1(path);
-    part2();
+    part2(path);
 }

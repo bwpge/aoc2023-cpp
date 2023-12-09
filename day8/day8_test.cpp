@@ -21,3 +21,18 @@ TEST(Day8, Steps) {
     auto steps = network.steps("LLR");
     EXPECT_EQ(steps, 6);
 }
+
+TEST(Day8, StepsParallel) {
+    Network network{};
+    network.add({"11A", "11B", "XXX"});
+    network.add({"11B", "XXX", "11Z"});
+    network.add({"11Z", "11B", "XXX"});
+    network.add({"22A", "22B", "XXX"});
+    network.add({"22B", "22C", "22C"});
+    network.add({"22C", "22Z", "22Z"});
+    network.add({"22Z", "22B", "22B"});
+    network.add({"XXX", "XXX", "XXX"});
+
+    auto steps = network.steps_parallel("LR");
+    EXPECT_EQ(steps, 6);
+}
