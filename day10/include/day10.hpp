@@ -92,6 +92,7 @@ public:
             break;
         }
 
+        AOC_ASSERT(found, "maze must have a starting tile");
         return result;
     }
 
