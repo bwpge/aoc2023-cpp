@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 
 using day9::Reading;
+using Direction = Reading::Direction;
 
 TEST(Day9, Reading) {
     const std::vector<std::string> lines{
@@ -10,7 +11,7 @@ TEST(Day9, Reading) {
         "1 3 6 10 15 21",
         "10 13 16 21 30 45",
     };
-    const std::vector<std::vector<int64_t>> values{
+    const std::vector<std::deque<int64_t>> values{
         {0, 3, 6, 9, 12, 15},
         {1, 3, 6, 10, 15, 21},
         {10, 13, 16, 21, 30, 45},
@@ -22,7 +23,7 @@ TEST(Day9, Reading) {
     }
 }
 
-TEST(Day9, ReadingPredict) {
+TEST(Day9, ReadingFuture) {
     const std::vector<std::pair<std::string, int64_t>> test_data{
         {"0 3 6 9 12 15", 18},
         {"1 3 6 10 15 21", 28},
@@ -31,7 +32,7 @@ TEST(Day9, ReadingPredict) {
 
     for (const auto& [line, expected] : test_data) {
         auto r = Reading::parse(line);
-        EXPECT_EQ(r.predict(), expected);
+        EXPECT_EQ(r.analyze(Direction::Future), expected);
     }
 }
 
@@ -45,6 +46,6 @@ TEST(Day9, ReadingPast) {
 
     for (const auto& [line, expected] : test_data) {
         auto r = Reading::parse(line);
-        EXPECT_EQ(r.past(), expected);
+        EXPECT_EQ(r.analyze(Direction::Past), expected);
     }
 }
