@@ -2,12 +2,31 @@
 
 #include "aoc/aoc.hpp"
 
+#include <queue>
+#include <unordered_set>
+
 namespace day10 {
 
+struct Coord {
+    size_t x{};
+    size_t y{};
+
+    auto operator<=>(const Coord& other) const = default;
+};
+}  // namespace day10
+
+namespace std {
+template<>
+struct hash<day10::Coord> {
+    size_t operator()(const day10::Coord& coord) const {
+        return std::hash<size_t>()(coord.x) ^ (std::hash<size_t>()(coord.y) << 1);
+    }
+};
+}  // namespace std
+
+namespace day10 {
 class Maze {
 public:
-    using Coord = std::pair<size_t, size_t>;
-
     enum class Direction {
         North,
         East,
@@ -16,8 +35,8 @@ public:
     };
 
     static Direction direction(Coord from, Coord to) {
-        auto dx = static_cast<int64_t>(to.first) - static_cast<int64_t>(from.first);
-        auto dy = static_cast<int64_t>(to.second) - static_cast<int64_t>(from.second);
+        auto dx = static_cast<int64_t>(to.x) - static_cast<int64_t>(from.x);
+        auto dy = static_cast<int64_t>(to.y) - static_cast<int64_t>(from.y);
 
         AOC_ASSERT(
             (std::abs(dx) + std::abs(dy)) == 1,
@@ -112,7 +131,7 @@ public:
     }
 
     [[nodiscard]]
-    std::vector<Coord> adjacent(Coord pos) {
+    std::vector<Coord> adjacent(Coord pos) const {
         std::vector<Coord> result{};
 
         auto push_coord = [this, &result](const Coord& src, const Coord& dst) {
@@ -122,20 +141,20 @@ public:
         };
 
         // north
-        if (pos.second > 0) {
-            push_coord(pos, {pos.first, pos.second - 1});
+        if (pos.y > 0) {
+            push_coord(pos, {pos.x, pos.y - 1});
         }
         // east
-        if (pos.first + 1 <= width()) {
-            push_coord(pos, {pos.first + 1, pos.second});
+        if (pos.x + 1 <= width()) {
+            push_coord(pos, {pos.x + 1, pos.y});
         }
         // south
-        if (pos.second + 1 <= height()) {
-            push_coord(pos, {pos.first, pos.second + 1});
+        if (pos.y + 1 <= height()) {
+            push_coord(pos, {pos.x, pos.y + 1});
         }
         // west
-        if (pos.first > 0) {
-            push_coord(pos, {pos.first - 1, pos.second});
+        if (pos.x > 0) {
+            push_coord(pos, {pos.x - 1, pos.y});
         }
 
         return result;
@@ -143,7 +162,7 @@ public:
 
     [[nodiscard]]
     char at(Coord pos) const {
-        return _grid[pos.second][pos.first];  // use row major
+        return _grid[pos.y][pos.x];  // use row major
     }
 
     [[nodiscard]]
@@ -152,7 +171,7 @@ public:
     }
 
     void set_tile(Coord pos, char c) {
-        _grid[pos.second][pos.first] = c;
+        _grid[pos.y][pos.x] = c;
     }
 
     void set_tile(size_t x, size_t y, char c) {
@@ -169,9 +188,91 @@ public:
         return _grid.size();
     }
 
+    [[nodiscard]]
+    Coord start() const {
+        return _start;
+    }
+
 private:
     std::vector<std::vector<char>> _grid{};
     Coord _start{};
+};
+
+struct Node {
+    size_t id{};
+    Coord pos{};
+    std::list<Node> adjacent{};
+};
+
+class Graph {
+public:
+    static Graph from_maze(const Maze& maze) {
+        Graph graph{};
+        graph._head = {graph.gen_id(), maze.start(), {}};
+
+        std::queue<Node*> nodes{};
+        nodes.push(&graph._head);
+        std::unordered_set<Coord> seen{};
+
+        graph.build_bfs(maze, nodes, seen);
+        return graph;
+    }
+
+    [[nodiscard]]
+    std::unordered_map<Coord, size_t> distances() const {
+        std::unordered_map<Coord, size_t> result{};
+        map_distances(result, &_head, 0);
+        return result;
+    }
+
+private:
+    void build_bfs(  // NOLINT(misc-no-recursion)
+        const Maze& maze,
+        std::queue<Node*>& nodes,
+        std::unordered_set<Coord>& seen
+    ) {
+        if (nodes.empty()) {
+            return;
+        }
+
+        auto* node = nodes.front();
+        nodes.pop();
+        seen.insert(node->pos);
+
+        for (const auto& coord : maze.adjacent(node->pos)) {
+            if (!seen.contains(coord)) {
+                auto id = gen_id();
+                auto& n = node->adjacent.emplace_back(id, coord, std::list<Node>{});
+                nodes.push(&n);
+            }
+        }
+
+        build_bfs(maze, nodes, seen);
+    }
+
+    void map_distances(  // NOLINT(misc-no-recursion)
+        std::unordered_map<Coord, size_t>& map,
+        const Node* node,
+        size_t dist
+    ) const {
+        auto p = node->pos;
+        if (!node || (map.contains(p) && map[p] <= dist)) {
+            return;
+        }
+        map[p] = dist;
+
+        for (const auto& n : node->adjacent) {
+            map_distances(map, &n, dist + 1);
+        }
+    }
+
+    [[nodiscard]]
+    size_t gen_id() {
+        return _id++;
+    }
+
+    Node _head{};
+    size_t _id{};
 };
 
 }  // namespace day10

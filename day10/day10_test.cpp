@@ -2,9 +2,13 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
+#include <ranges>
+
+using day10::Coord;
+using day10::Graph;
 using day10::Maze;
 using Direction = Maze::Direction;
-using Coord = Maze::Coord;
 
 const std::vector<std::string> SIMPLE_PIPES{
     ".....",
@@ -46,7 +50,7 @@ TEST(Day10, MazeConnects) {
     auto m = Maze::parse(SIMPLE_PIPES);
     for (const auto& [pos, expected] : test_data) {
         auto [expect_n, expect_e, expect_s, expect_w] = expected;
-        auto msg = fmt::format("at pos=({}, {})", pos.first, pos.second);
+        auto msg = fmt::format("at pos=({}, {})", pos.x, pos.y);
 
         EXPECT_EQ(m.connects_to(pos, Direction::North), expect_n) << msg;
         EXPECT_EQ(m.connects_to(pos, Direction::East), expect_e) << msg;
@@ -90,18 +94,51 @@ TEST(Day10, MazeAdjacent) {
 
     for (const auto& [src, coords] : expect) {
         auto adjacent = m.adjacent(src);
-        auto msg_size = fmt::format("size mistmatch for src=({}, {})", src.first, src.second);
+        auto msg_size = fmt::format("size mistmatch for src=({}, {})", src.x, src.y);
         EXPECT_EQ(adjacent.size(), coords.size()) << msg_size;
 
         for (const auto& expected : coords) {
             auto msg = fmt::format(
                 "missing expected neighbor ({}, {}) for src=({}, {})",
-                expected.first,
-                expected.second,
-                src.first,
-                src.second
+                expected.x,
+                expected.y,
+                src.x,
+                src.y
             );
             EXPECT_TRUE(aoc::contains(adjacent, expected)) << msg;
         }
     }
+}
+
+TEST(Day10, GraphDistances) {
+    const size_t expected = 4;
+    auto g = Graph::from_maze(Maze::parse(PIPES));
+    auto d = g.distances();
+
+    size_t value{};
+    for (const auto& [_, v] : d) {
+        value = std::max(value, v);
+    }
+
+    EXPECT_EQ(value, expected);
+}
+
+TEST(Day10, GraphDistancesComplex) {
+    const size_t expected = 8;
+    const std::vector<std::string> data{
+        "..F7.",
+        ".FJ|.",
+        "SJ.L7",
+        "|F--J",
+        "LJ...",
+    };
+    auto g = Graph::from_maze(Maze::parse(data));
+    auto d = g.distances();
+
+    size_t value{};
+    for (const auto& [_, v] : d) {
+        value = std::max(value, v);
+    }
+
+    EXPECT_EQ(value, expected);
 }
