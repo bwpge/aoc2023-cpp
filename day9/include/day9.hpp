@@ -52,6 +52,37 @@ public:
     }
 
     [[nodiscard]]
+    num_type past() const {
+        std::deque<std::deque<num_type>> stack{std::deque<num_type>{_nums.begin(), _nums.end()}};
+        std::deque<num_type> current{};
+
+        // generate next sequence until all zeroes
+        while (!std::ranges::all_of(stack.front(), [](auto i) { return i == 0; })) {
+            const auto& front = stack.front();
+            AOC_ASSERT(!front.empty(), "row does not contain any numbers");
+
+            for (size_t i = front.size() - 1; i > 0; --i) {
+                current.push_front(front[i] - front[i - 1]);
+            }
+            stack.emplace_front(std::move(current));
+            current = {};
+        }
+
+        // unwind rows to get prediction
+        while (stack.size() > 1) {
+            current = stack.front();
+            stack.pop_front();
+            auto& front = stack.front();
+
+            auto i = front.front();
+            auto j = current.front();
+            front.push_front(i - j);
+        }
+
+        return stack.front().front();
+    }
+
+    [[nodiscard]]
     const std::vector<int64_t>& values() const {
         return _nums;
     }
