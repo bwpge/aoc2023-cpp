@@ -29,6 +29,7 @@ Markdown versions of each problem are stored as README's for each solution direc
 | 6 | [Wait For It](day6/README.md) |
 | 7 | [Camel Cards](day7/README.md) |
 | 8 | [Haunted Wasteland](day8/README.md) |
+| 9 | [Mirage Maintenance](day9/README.md) |
 
 ## Tools
 
