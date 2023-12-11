@@ -2,6 +2,7 @@
 
 #include "aoc/aoc.hpp"
 
+#include <memory>
 #include <queue>
 #include <unordered_set>
 
@@ -200,79 +201,76 @@ private:
 };
 
 struct Node {
-    size_t id{};
     Coord pos{};
-    std::list<Node> adjacent{};
+    std::list<Node*> adjacent{};
 };
 
 class Graph {
 public:
     static Graph from_maze(const Maze& maze) {
         Graph graph{};
-        graph._head = {graph.gen_id(), maze.start(), {}};
+        graph._head = {maze.start(), {}};
 
+        // build graph with bfs traversal
         std::queue<Node*> nodes{};
         nodes.push(&graph._head);
         std::unordered_set<Coord> seen{};
 
-        graph.build_bfs(maze, nodes, seen);
+        while (!nodes.empty()) {
+            auto* node = nodes.front();
+            nodes.pop();
+            seen.insert(node->pos);
+
+            for (const auto& coord : maze.adjacent(node->pos)) {
+                // see issue #2: linked lists were causing recursion problems, so instead
+                // we hold all nodes in a vector of unique pointers. even if the vector
+                // reallocates and moves its contents, only the unique_ptr itself is moved,
+                // not the underlying address of the node. this definitely still has problems
+                // (e.g., if a ptr is deleted from the vector), but this solution works fine
+                // for what it needs to do.
+                if (!seen.contains(coord)) {
+                    graph._nodes.push_back(std::make_unique<Node>(coord, std::list<Node*>{}));
+                    auto* n = graph._nodes.back().get();
+                    node->adjacent.push_back(n);
+                    nodes.push(n);
+                }
+            }
+        }
+
         return graph;
     }
 
     [[nodiscard]]
     std::unordered_map<Coord, size_t> distances() const {
-        std::unordered_map<Coord, size_t> result{};
-        map_distances(result, &_head, 0);
-        return result;
-    }
+        std::unordered_map<Coord, size_t> map{};
+        std::queue<std::pair<const Node*, size_t>> nodes{};
+        nodes.emplace(&_head, 0);
 
-private:
-    void build_bfs(  // NOLINT(misc-no-recursion)
-        const Maze& maze,
-        std::queue<Node*>& nodes,
-        std::unordered_set<Coord>& seen
-    ) {
-        if (nodes.empty()) {
-            return;
-        }
+        // use bfs to traverse all nodes and track distances. the only difference to
+        // general bfs algorithm (which generally uses "seen" tracker), is to keep
+        // tracking the node and only stop if we have a better distance for it.
+        while (!nodes.empty()) {
+            const auto& [node, depth] = nodes.front();
+            nodes.pop();
+            auto p = node->pos;
 
-        auto* node = nodes.front();
-        nodes.pop();
-        seen.insert(node->pos);
+            // skip this node if we already found a better path
+            if (map.contains(p) && map[p] <= depth) {
+                continue;
+            }
+            map[p] = depth;
 
-        for (const auto& coord : maze.adjacent(node->pos)) {
-            if (!seen.contains(coord)) {
-                auto id = gen_id();
-                auto& n = node->adjacent.emplace_back(id, coord, std::list<Node>{});
-                nodes.push(&n);
+            for (const auto* n : node->adjacent) {
+                nodes.emplace(n, depth + 1);
             }
         }
 
-        build_bfs(maze, nodes, seen);
+        return map;
     }
 
-    void map_distances(  // NOLINT(misc-no-recursion)
-        std::unordered_map<Coord, size_t>& map,
-        const Node* node,
-        size_t dist
-    ) const {
-        auto p = node->pos;
-        if (!node || (map.contains(p) && map[p] <= dist)) {
-            return;
-        }
-        map[p] = dist;
-
-        for (const auto& n : node->adjacent) {
-            map_distances(map, &n, dist + 1);
-        }
-    }
-
-    [[nodiscard]]
-    size_t gen_id() {
-        return _id++;
-    }
-
+private:
     Node _head{};
+    std::vector<std::unique_ptr<Node>> _nodes{};
     size_t _id{};
 };
 
