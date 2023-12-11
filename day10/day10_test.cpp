@@ -35,7 +35,7 @@ TEST(Day10, MazeConnects) {
     // has the form: [ coord, expected=(north, east, south, west) ]
     const std::vector<std::pair<Coord, std::tuple<bool, bool, bool, bool>>> test_data{
         {{0, 0}, {false, false, false, false}},  // .
-        {{1, 1}, {true, true, true, true}},  // S
+        {{1, 1}, {false, true, true, false}},  // S => deduces to F
         {{2, 1}, {false, true, false, true}},  // -
         {{3, 1}, {false, false, true, true}},  // 7
         {{1, 2}, {true, false, true, false}},  // |
@@ -125,4 +125,39 @@ TEST(Day10, MazeFurthestComplex) {
     };
     auto m = Maze::parse(data);
     EXPECT_EQ(m.furthest(), expected);
+}
+
+TEST(Day10, MazeEnclosed) {
+    const size_t expected = 4;
+    const std::vector<std::string> data{
+        "...........",
+        ".S-------7.",
+        ".|F-----7|.",
+        ".||.....||.",
+        ".||.....||.",
+        ".|L-7.F-J|.",
+        ".|..|.|..|.",
+        ".L--J.L--J.",
+        "...........",
+    };
+    auto m = Maze::parse(data);
+    EXPECT_EQ(m.enclosed(), expected);
+}
+
+TEST(Day10, MazeEnclosedComplex) {
+    const size_t expected = 10;
+    const std::vector<std::string> data{
+        "FF7FSF7F7F7F7F7F---7",
+        "L|LJ||||||||||||F--J",
+        "FL-7LJLJ||||||LJL-77",
+        "F--JF--7||LJLJ7F7FJ-",
+        "L---JF-JLJ.||-FJLJJ7",
+        "|F|F-JF---7F7-L7L|7|",
+        "|FFJF7L7F-JF7|JL---7",
+        "7-L-JL7||F7|L7F-7F7|",
+        "L.L7LFJ|||||FJL7||LJ",
+        "L7JLJL-JLJLJL--JLJ.L",
+    };
+    auto m = Maze::parse(data);
+    EXPECT_EQ(m.enclosed(), expected);
 }

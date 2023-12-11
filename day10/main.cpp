@@ -22,10 +22,13 @@ void part1(const Maze& maze) {
     fmt::println("Part 1: {}", result);
 }
 
-void part2() {}
+void part2(const Maze& maze) {
+    auto result = maze.enclosed();
+    fmt::println("Part 2: {}", result);
+}
 
 int main() {
     auto maze = parse_maze("data/day10.txt");
     part1(maze);
-    part2();
+    part2(maze);
 }

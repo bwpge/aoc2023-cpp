@@ -25,6 +25,95 @@ struct hash<day10::Coord> {
 }  // namespace std
 
 namespace day10 {
+
+class Sample {
+public:
+    Sample() = default;
+
+    explicit Sample(bool value) : _top_l{value}, _top_r{value}, _bot_l{value}, _bot_r{value} {}
+
+    static Sample from_pipe(char pipe, bool top_left) {
+        Sample s{};
+        s._top_l = top_left;
+
+        // we know that crossing over a pipe of the main loop is going to change if the quadrant is
+        // filled or not. so as long as we are provided a top left value, we can figure out
+        // everything else for this sample based on the pipe character.
+        switch (pipe) {
+            case '|':
+                s._top_r = !top_left;
+                s._bot_l = top_left;
+                s._bot_r = !top_left;
+                break;
+            case '-':
+                s._top_r = top_left;
+                s._bot_l = !top_left;
+                s._bot_r = !top_left;
+                break;
+            case 'L':
+                s._top_r = !top_left;
+                s._bot_l = top_left;
+                s._bot_r = top_left;
+                break;
+            case 'J':
+                s._top_r = !top_left;
+                s._bot_l = !top_left;
+                s._bot_r = !top_left;
+                break;
+            case '7':
+                s._top_r = top_left;
+                s._bot_l = !top_left;
+                s._bot_r = top_left;
+                break;
+            case 'F':
+                s._top_r = top_left;
+                s._bot_l = top_left;
+                s._bot_r = !top_left;
+                break;
+            case '.':
+                s._top_r = top_left;
+                s._bot_l = top_left;
+                s._bot_r = top_left;
+                break;
+            default:
+                aoc::panic("unknown pipe character");
+        }
+
+        return s;
+    }
+
+    [[nodiscard]]
+    bool is_filled() const {
+        return _top_l && _top_r && _bot_l && _bot_r;
+    }
+
+    [[nodiscard]]
+    bool top_left() const {
+        return _top_l;
+    }
+
+    [[nodiscard]]
+    bool top_right() const {
+        return _top_r;
+    }
+
+    [[nodiscard]]
+    bool bottom_left() const {
+        return _bot_l;
+    }
+
+    [[nodiscard]]
+    bool bottom_right() const {
+        return _bot_r;
+    }
+
+private:
+    bool _top_l{};
+    bool _top_r{};
+    bool _bot_l{};
+    bool _bot_r{};
+};
+
 class Maze {
 public:
     enum class Direction {
@@ -74,6 +163,7 @@ public:
         }
 
         result.find_start_pos();
+        result.deduce_start_tile();
         result.traverse_main_loop();
 
         return result;
@@ -178,6 +268,45 @@ public:
     }
 
     [[nodiscard]]
+    size_t enclosed() const {
+        // the method we use here is to "subsample" each tile:
+        // - each pipe can split the tile into at most 4 quadrants
+        // - the only pipes that can split a tile are the main loop (all others ignored)
+        // - the subsample grid will only have enclosed/external values (no pipes)
+        // - each sample is filled by previous tile's values (prev top right => next top left)
+        // - the top left of each row's starting tile is assumed to be false (since the loop cannot
+        //   exit the grid)
+        // - the final sum is of samples that are entirely filled (we don't care about splits)
+
+        size_t result{};
+
+        // we don't actually need to store the entire grid, only the previous tile in the row.
+        // so we can just iterate rows as scanlines and store the previous tile
+        for (size_t y = 0; y < height(); ++y) {
+            std::optional<Sample> last{};
+
+            for (size_t x = 0; x < width(); ++x) {
+                // the top left of this sample is determined from previous sample's top right
+                bool top_left = last.has_value() ? last.value().top_right() : false;
+                Coord coord{x, y};
+
+                // determine if the sample gets split by a pipe or not
+                if (_loop.contains(coord)) {
+                    last = Sample::from_pipe(at(coord), top_left);
+                } else {
+                    last = Sample{top_left};
+                }
+
+                if (last.value().is_filled()) {
+                    result += 1;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    [[nodiscard]]
     char at(Coord pos) const {
         return _grid[pos.y][pos.x];  // use row major
     }
@@ -233,6 +362,39 @@ private:
         AOC_ASSERT(found, "maze must have a starting tile");
     }
 
+    void deduce_start_tile() {
+        auto north = _start.y > 0 ? connects_to({_start.x, _start.y - 1}, _start) : false;
+        auto east = _start.x < width() + 1 ? connects_to({_start.x + 1, _start.y}, _start) : false;
+        auto south =
+            _start.y < height() + 1 ? connects_to({_start.x, _start.y + 1}, _start) : false;
+        auto west = _start.x > 0 ? connects_to({_start.x - 1, _start.y}, _start) : false;
+
+        int count = static_cast<int>(north) + static_cast<int>(east) + static_cast<int>(south)
+            + static_cast<int>(west);
+        AOC_ASSERT(count == 2, "can only deduce tile from 2 connections");
+
+        if (north && south) {
+            return set_tile(_start, '|');
+        }
+        if (east && west) {
+            return set_tile(_start, '-');
+        }
+        if (north && east) {
+            return set_tile(_start, 'L');
+        }
+        if (north && west) {
+            return set_tile(_start, 'J');
+        }
+        if (south && west) {
+            return set_tile(_start, '7');
+        }
+        if (south && east) {
+            return set_tile(_start, 'F');
+        }
+
+        aoc::panic("could not deduce starting tile");
+    }
+
     void traverse_main_loop() {
         std::queue<Coord> nodes{};
         nodes.push(_start);
@@ -242,10 +404,10 @@ private:
             auto node = nodes.front();
             nodes.pop();
             seen.insert(node);
+            _loop.insert(node);
 
             for (const auto& coord : adjacent(node)) {
                 if (!seen.contains(coord)) {
-                    _loop.push_back(coord);
                     nodes.push(coord);
                 }
             }
@@ -254,7 +416,7 @@ private:
 
     std::vector<std::vector<char>> _grid{};
     Coord _start{};
-    std::list<Coord> _loop{};
+    std::unordered_set<Coord> _loop{};
 };
 
 }  // namespace day10
