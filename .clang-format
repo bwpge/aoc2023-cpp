@@ -10,7 +10,7 @@ ColumnLimit: 99
 # indent style
 AccessModifierOffset: -4
 ContinuationIndentWidth: 4
-IndentPPDirectives: BeforeHash
+IndentPPDirectives: AfterHash
 IndentWidth: 4
 IndentWrappedFunctionNames: false
 NamespaceIndentation: Inner
