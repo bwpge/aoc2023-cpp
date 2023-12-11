@@ -2,11 +2,9 @@
 
 #include <gtest/gtest.h>
 
-#include <algorithm>
 #include <ranges>
 
 using day10::Coord;
-using day10::Graph;
 using day10::Maze;
 using Direction = Maze::Direction;
 
@@ -110,20 +108,13 @@ TEST(Day10, MazeAdjacent) {
     }
 }
 
-TEST(Day10, GraphDistances) {
+TEST(Day10, MazeFurthest) {
     const size_t expected = 4;
-    auto g = Graph::from_maze(Maze::parse(PIPES));
-    auto d = g.distances();
-
-    size_t value{};
-    for (const auto& [_, v] : d) {
-        value = std::max(value, v);
-    }
-
-    EXPECT_EQ(value, expected);
+    auto m = Maze::parse(PIPES);
+    EXPECT_EQ(m.furthest(), expected);
 }
 
-TEST(Day10, GraphDistancesComplex) {
+TEST(Day10, MazeFurthestComplex) {
     const size_t expected = 8;
     const std::vector<std::string> data{
         "..F7.",
@@ -132,13 +123,6 @@ TEST(Day10, GraphDistancesComplex) {
         "|F--J",
         "LJ...",
     };
-    auto g = Graph::from_maze(Maze::parse(data));
-    auto d = g.distances();
-
-    size_t value{};
-    for (const auto& [_, v] : d) {
-        value = std::max(value, v);
-    }
-
-    EXPECT_EQ(value, expected);
+    auto m = Maze::parse(data);
+    EXPECT_EQ(m.furthest(), expected);
 }

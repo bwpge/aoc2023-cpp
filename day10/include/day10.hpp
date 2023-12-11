@@ -2,7 +2,6 @@
 
 #include "aoc/aoc.hpp"
 
-#include <memory>
 #include <queue>
 #include <unordered_set>
 
@@ -74,26 +73,9 @@ public:
             AOC_ASSERT(row.size() == width, "all rows must have equal size");
         }
 
-        // store start coordinate
-        size_t y{};
-        bool found = false;
-        for (const auto& row : result._grid) {
-            if (!aoc::contains(row, 'S')) {
-                ++y;
-                continue;
-            }
+        result.find_start_pos();
+        result.traverse_main_loop();
 
-            for (size_t x = 0; x < row.size(); ++x) {
-                if (row[x] == 'S') {
-                    result._start = {x, y};
-                    found = true;
-                    break;
-                }
-            }
-            break;
-        }
-
-        AOC_ASSERT(found, "maze must have a starting tile");
         return result;
     }
 
@@ -163,6 +145,39 @@ public:
     }
 
     [[nodiscard]]
+    size_t furthest() const {
+        std::unordered_map<Coord, size_t> map{};
+        std::queue<std::pair<Coord, size_t>> nodes{};
+        nodes.emplace(_start, 0);
+
+        // use bfs to traverse all nodes, use "depth" to track distance
+        while (!nodes.empty()) {
+            const auto& [node, depth] = nodes.front();
+            nodes.pop();
+
+            // skip this node if we already found a better path (this also implies
+            // we have a better path for adjacent), otherwise store the new depth
+            if (map.contains(node) && map[node] <= depth) {
+                continue;
+            }
+            map[node] = depth;
+
+            // always add adjacent nodes if we stored current depth --
+            // this could possibly update connected nodes
+            for (const auto& n : adjacent(node)) {
+                nodes.emplace(n, depth + 1);
+            }
+        }
+
+        size_t result{};
+        for (const auto& [_, d] : map) {
+            result = std::max(result, d);
+        }
+
+        return result;
+    }
+
+    [[nodiscard]]
     char at(Coord pos) const {
         return _grid[pos.y][pos.x];  // use row major
     }
@@ -196,82 +211,50 @@ public:
     }
 
 private:
-    std::vector<std::vector<char>> _grid{};
-    Coord _start{};
-};
+    void find_start_pos() {
+        size_t y{};
+        bool found = false;
+        for (const auto& row : _grid) {
+            if (!aoc::contains(row, 'S')) {
+                ++y;
+                continue;
+            }
 
-struct Node {
-    Coord pos{};
-    std::list<Node*> adjacent{};
-};
+            for (size_t x = 0; x < row.size(); ++x) {
+                if (row[x] == 'S') {
+                    _start = {x, y};
+                    found = true;
+                    break;
+                }
+            }
+            break;
+        }
 
-class Graph {
-public:
-    static Graph from_maze(const Maze& maze) {
-        Graph graph{};
-        graph._head = {maze.start(), {}};
+        AOC_ASSERT(found, "maze must have a starting tile");
+    }
 
-        // build graph with bfs traversal
-        std::queue<Node*> nodes{};
-        nodes.push(&graph._head);
+    void traverse_main_loop() {
+        std::queue<Coord> nodes{};
+        nodes.push(_start);
         std::unordered_set<Coord> seen{};
 
         while (!nodes.empty()) {
-            auto* node = nodes.front();
+            auto node = nodes.front();
             nodes.pop();
-            seen.insert(node->pos);
+            seen.insert(node);
 
-            for (const auto& coord : maze.adjacent(node->pos)) {
-                // see issue #2: linked lists were causing recursion problems, so instead
-                // we hold all nodes in a vector of unique pointers. even if the vector
-                // reallocates and moves its contents, only the unique_ptr itself is moved,
-                // not the underlying address of the node. this definitely still has problems
-                // (e.g., if a ptr is deleted from the vector), but this solution works fine
-                // for what it needs to do.
+            for (const auto& coord : adjacent(node)) {
                 if (!seen.contains(coord)) {
-                    graph._nodes.push_back(std::make_unique<Node>(coord, std::list<Node*>{}));
-                    auto* n = graph._nodes.back().get();
-                    node->adjacent.push_back(n);
-                    nodes.push(n);
+                    _loop.push_back(coord);
+                    nodes.push(coord);
                 }
             }
         }
-
-        return graph;
     }
 
-    [[nodiscard]]
-    std::unordered_map<Coord, size_t> distances() const {
-        std::unordered_map<Coord, size_t> map{};
-        std::queue<std::pair<const Node*, size_t>> nodes{};
-        nodes.emplace(&_head, 0);
-
-        // use bfs to traverse all nodes and track distances. the only difference to
-        // general bfs algorithm (which generally uses "seen" tracker), is to keep
-        // tracking the node and only stop if we have a better distance for it.
-        while (!nodes.empty()) {
-            const auto& [node, depth] = nodes.front();
-            nodes.pop();
-            auto p = node->pos;
-
-            // skip this node if we already found a better path
-            if (map.contains(p) && map[p] <= depth) {
-                continue;
-            }
-            map[p] = depth;
-
-            for (const auto* n : node->adjacent) {
-                nodes.emplace(n, depth + 1);
-            }
-        }
-
-        return map;
-    }
-
-private:
-    Node _head{};
-    std::vector<std::unique_ptr<Node>> _nodes{};
-    size_t _id{};
+    std::vector<std::vector<char>> _grid{};
+    Coord _start{};
+    std::list<Coord> _loop{};
 };
 
 }  // namespace day10

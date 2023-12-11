@@ -4,7 +4,9 @@
 #include <string>
 #include <vector>
 
-void part1(const std::filesystem::path& path) {
+using day10::Maze;
+
+Maze parse_maze(const std::filesystem::path& path) {
     auto input = aoc::open(path);
     std::vector<std::string> lines{};
     std::string line{};
@@ -12,22 +14,18 @@ void part1(const std::filesystem::path& path) {
         lines.push_back(line);
     }
 
-    auto maze = day10::Maze::parse(lines);
-    auto graph = day10::Graph::from_maze(maze);
-    auto distances = graph.distances();
+    return Maze::parse(lines);
+}
 
-    size_t d{};
-    for (const auto& [_, v] : distances) {
-        d = std::max(d, v);
-    }
-
-    fmt::println("Part 1: {}", d);
+void part1(const Maze& maze) {
+    auto result = maze.furthest();
+    fmt::println("Part 1: {}", result);
 }
 
 void part2() {}
 
 int main() {
-    std::filesystem::path path{"data/day10.txt"};
-    part1(path);
+    auto maze = parse_maze("data/day10.txt");
+    part1(maze);
     part2();
 }
