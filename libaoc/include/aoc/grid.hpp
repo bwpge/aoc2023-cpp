@@ -4,10 +4,6 @@
 #include "aoc/hash.hpp"
 #include "aoc/types.hpp"
 
-#include <optional>
-#include <queue>
-#include <unordered_set>
-
 namespace aoc {
 
 struct Coord {
@@ -116,31 +112,11 @@ public:
     }
 
     [[nodiscard]]
-    std::optional<size_t> min_distance(Coord from, Coord to) const {
-        AOC_ASSERT(contains(from) && contains(to), "invalid coordinates");
-
-        std::queue<std::pair<Coord, size_t>> nodes{};
-        nodes.emplace(from, 0);
-        std::unordered_set<Coord> visited{};
-
-        while (!nodes.empty()) {
-            const auto [node, dist] = nodes.front();
-            nodes.pop();
-
-            if (node == to) {
-                return dist;
-            }
-            if (visited.contains(node)) {
-                continue;
-            }
-            visited.insert(node);
-            for (const auto& n : adjacent(node)) {
-                nodes.emplace(n, dist + 1);
-            }
-        }
-
-        return {};
-    }
+    virtual size_t min_distance(const Coord& from, const Coord& to) const {
+        int64_t dx = static_cast<int64_t>(from.x) - static_cast<int64_t>(to.x);
+        int64_t dy = static_cast<int64_t>(from.y) - static_cast<int64_t>(to.y);
+        return std::abs(dx) + std::abs(dy);
+    };
 
     [[nodiscard]]
     constexpr const T& at(Coord pos) const {
