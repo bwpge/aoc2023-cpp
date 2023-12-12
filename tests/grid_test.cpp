@@ -13,12 +13,14 @@ const std::vector<std::string> EMPTY_MAP{
     "........",
     "........",
     "........",
+    "........",
+    "........",
 };
 
 TEST(AocGrid, MakeGrid) {
     auto grid = aoc::make_grid(EMPTY_MAP);
     EXPECT_EQ(grid.width(), 8);
-    EXPECT_EQ(grid.height(), 8);
+    EXPECT_EQ(grid.height(), 10);
 
     grid.at(1, 1) = '#';
     EXPECT_EQ(grid.at(0, 1), '.');
@@ -55,9 +57,9 @@ TEST(AocGrid, InsertRow) {
     const size_t row = 2;
 
     grid.insert_row(row, '#');
-    for (size_t i = 0; i < EMPTY_MAP.size(); ++i) {
-        for (size_t j = 0; j < EMPTY_MAP.front().size(); ++j) {
-            if (i == row) {
+    for (size_t i = 0; i < EMPTY_MAP.front().size(); ++i) {
+        for (size_t j = 0; j < EMPTY_MAP.size(); ++j) {
+            if (j == row) {
                 EXPECT_EQ(grid.at(i, j), '#') << "at (" << i << ", " << j << ")";
             } else {
                 EXPECT_EQ(grid.at(i, j), '.') << "at (" << i << ", " << j << ")";
@@ -71,9 +73,9 @@ TEST(AocGrid, InsertColumn) {
     const size_t col = 5;
 
     grid.insert_col(col, '#');
-    for (size_t i = 0; i < EMPTY_MAP.size(); ++i) {
-        for (size_t j = 0; j < EMPTY_MAP.front().size(); ++j) {
-            if (j == col) {
+    for (size_t i = 0; i < EMPTY_MAP.front().size(); ++i) {
+        for (size_t j = 0; j < EMPTY_MAP.size(); ++j) {
+            if (i == col) {
                 EXPECT_EQ(grid.at(i, j), '#') << "at (" << i << ", " << j << ")";
             } else {
                 EXPECT_EQ(grid.at(i, j), '.') << "at (" << i << ", " << j << ")";

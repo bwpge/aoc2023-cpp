@@ -175,15 +175,15 @@ public:
     }
 
     void insert_row(usize offset, const T& fill) {
+        AOC_ASSERT(offset <= width(), "row offset out of range");
+        _inner.insert(_inner.begin() + offset, std::vector<T>(width(), fill));
+    }
+
+    void insert_col(usize offset, const T& fill) {
         AOC_ASSERT(offset <= height(), "column offset out of range");
         for (auto& col : _inner) {
             col.insert(col.begin() + offset, fill);
         }
-    }
-
-    void insert_col(usize offset, const T& fill) {
-        AOC_ASSERT(offset <= width(), "row offset out of range");
-        _inner.insert(_inner.begin() + offset, std::vector<T>(width(), fill));
     }
 
 private:
