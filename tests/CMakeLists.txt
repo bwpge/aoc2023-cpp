@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_executable(${PROJECT_NAME}
     "collections_test.cpp"
     "decode_test.cpp"
+    "grid_test.cpp"
     "stringutils_test.cpp"
 )
 

@@ -28,7 +28,7 @@ std::vector<std::pair<A, B>> zip_copy(const ContA& a, const ContB& b) {
     return result;
 }
 
-template<std::ranges::range Container, typename T>
+template<std::ranges::range Container, typename T = Container::value_type>
 bool contains(const Container& cont, const T& value) {
     return std::ranges::find(cont, value) != std::end(cont);
 }

@@ -45,4 +45,7 @@ concept Pattern = requires(T t) {
     { details::pattern_len(t) } -> std::same_as<details::size_type>;
 };
 
+template<typename T>
+using range_val = std::ranges::range_value_t<T>;
+
 }  // namespace aoc
