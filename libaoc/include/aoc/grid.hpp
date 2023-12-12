@@ -1,6 +1,7 @@
 #pragma once
 
 #include "aoc/core.hpp"
+#include "aoc/hash.hpp"
 #include "aoc/types.hpp"
 
 #include <optional>
@@ -30,7 +31,9 @@ namespace std {
 template<>
 struct hash<aoc::Coord> {
     size_t operator()(const aoc::Coord& coord) const {
-        return std::hash<size_t>()(coord.x) ^ (std::hash<size_t>()(coord.y) << 1);
+        size_t seed{};
+        aoc::hash_combine(seed, coord.x, coord.y);
+        return seed;
     }
 };
 }  // namespace std

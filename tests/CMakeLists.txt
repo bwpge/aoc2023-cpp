@@ -8,6 +8,7 @@ add_executable(${PROJECT_NAME}
     "collections_test.cpp"
     "decode_test.cpp"
     "grid_test.cpp"
+    "hash_test.cpp"
     "stringutils_test.cpp"
 )
 

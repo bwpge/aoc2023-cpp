@@ -27,6 +27,7 @@ target_precompile_headers(${PROJECT_NAME}
         "<cstdint>"
         "<filesystem>"
         "<fstream>"
+        "<functional>"
         "<iostream>"
         "<optional>"
         "<ostream>"
